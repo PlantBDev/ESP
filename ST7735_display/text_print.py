@@ -31,13 +31,28 @@ def print():
     draw = ImageDraw.Draw(image)
     font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", FONTSIZE)
 
-    text = "Testi Testi"
+    text = "abcdefghijkl"
+    #line 1
     (font_width, font_height) = font.getsize(text)
+    draw.text((0,0),text,font=font,fill=(255,255,0),
+    )
+    #line 2
+    draw.text((0, font_height),text,font=font,fill=(255,255,0),
+    )
+    #line 3
+    draw.text((0,font_height*2),text,font=font,fill=(255,255,0),
+    )
+    #line 4
+    draw.text((0,font_height*3),text,font=font,fill=(255,255,0),
+    )
+    #line 5 does not fit using this font size (24)
+
+    """
     draw.text(
         (width // 2 - font_width // 2, height // 2 - font_height // 2),
         text,
         font=font,
         fill=(255, 255, 0),
-    )
+    )"""
 
     disp.image(image)
