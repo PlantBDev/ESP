@@ -1,6 +1,6 @@
 #A python script that displays text on the TFT-lcd
 
-def print():
+def print(lineNumber, lineText):
     import digitalio
     import board
     from PIL import Image, ImageDraw, ImageFont
@@ -30,21 +30,27 @@ def print():
     image = Image.new("RGB", (width, height))
     draw = ImageDraw.Draw(image)
     font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", FONTSIZE)
+    (font_width, font_height) = font.getsize(lineText)
 
-    text = "abcdefghijkl"
     #line 1
-    (font_width, font_height) = font.getsize(text)
-    draw.text((0,0),text,font=font,fill=(255,255,0),
-    )
+    if lineNumber == 1:
+        draw.text((0,0),lineText,font=font,fill=(255,255,0),
+        )
     #line 2
-    draw.text((0, font_height),text,font=font,fill=(255,255,0),
-    )
+    elif lineNumber == 2:
+        draw.text((0, font_height),lineText,font=font,fill=(255,255,0),
+        )
     #line 3
-    draw.text((0,font_height*2),text,font=font,fill=(255,255,0),
-    )
+    elif lineNumber == 3:
+        draw.text((0,font_height*2),lineText,font=font,fill=(255,255,0),
+        )
     #line 4
-    draw.text((0,font_height*3),text,font=font,fill=(255,255,0),
-    )
+    elif lineNumber == 4:
+        draw.text((0,font_height*3),lineText,font=font,fill=(255,255,0),
+        )
+    elif lineNumber == 5:
+        image = Image.open("kukka.jpg")
+
     #line 5 does not fit using this font size (24)
 
     """
