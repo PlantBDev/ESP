@@ -13,8 +13,8 @@ int nameCount[2] = {0,0};
 #include <Ticker.h>
 #include <AsyncMqttClient.h>
 
-#define WIFI_SSID "Mifi-2G"
-#define WIFI_PASSWORD "300028613652"
+#define WIFI_SSID ""
+#define WIFI_PASSWORD ""
 
 #define MQTT_HOST IPAddress(192, 168, 1, 246)
 #define MQTT_PORT 1883
