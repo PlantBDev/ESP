@@ -2,7 +2,7 @@
 #include <WiFi.h> //client for handling wifi connectivity
 #include <WiFiUdp.h> // library for User Datagram Protocol handling
 #include "netInfo.h" //information for wifi and NTP server
-#include "NTPclock.h"
+#include "eventTimer.h"
 #define debugNTP 0
 
 void setup() {
