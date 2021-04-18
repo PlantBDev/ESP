@@ -1,6 +1,6 @@
 //information used by espSchemaTimeTestMain.ino
 #ifndef netInfo
 #define netInfo
-  char* formSsid = "lassila";  //SSID
-  char* formPswd = "56310460"; //password
+  char* formSsid = "network_name";  //SSID
+  char* formPswd = "network_password"; //password
 #endif
