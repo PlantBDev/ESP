@@ -1,4 +1,3 @@
-#include <NTPClient.h> //library for network time protocol handling
 #include <WiFi.h> //client for handling wifi connectivity
 #include <WiFiUdp.h> // library for User Datagram Protocol handling
 #include "netInfo.h" //information for wifi and NTP server
@@ -31,11 +30,13 @@ void loop() {
   int testMinutes = 0;
   ClockOutputTest = NTPclock();
 
-  testHours = *ClockOutputTest; //NTPclock returns a pointer to 2 place array first hours then minutes
-  testMinutes = *(ClockOutputTest + 1);
+  //testHours = *ClockOutputTest; //NTPclock returns a pointer to 2 place array first hours then minutes
+  //testMinutes = *(ClockOutputTest + 1);
+  //Serial.print(testHours);
+  //Serial.println(testMinutes);
+  eventTimer(12, 20, 20, 50, 50, 50, 50);
 
-  Serial.print(testHours);
-  Serial.println(testMinutes);
+
   
   delay(10000);
 
