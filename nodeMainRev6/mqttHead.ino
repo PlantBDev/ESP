@@ -119,36 +119,58 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
      #if SENSORDEBUG
      Serial.println("Sensor readings requested!");
      #endif
-     if(temperature != 888888888 && humidity != 888888888 && soilMoisture != 888888888 && light != 888888888){
+
       // Sensor readings publish
       char outputChar[10];  //Conversions for the sensor data, because "mqttPub" eats only character strings
       String str;
       
-      str=String(temperature);
-      str.toCharArray(outputChar,10);
-      mqttPub(outputChar, "node/sensor/temp");  //TODO find out correct topics for these
-      
-      str=String(humidity);
-      str.toCharArray(outputChar,10);
-      mqttPub(outputChar, "node/sensor/hum");
-      
-      str=String(soilMoisture);
-      str.toCharArray(outputChar,10);
-      mqttPub(outputChar, "node/sensor/moist");
-      
+      if(temperature != 888888888){
+       str=String(temperature);
+       str.toCharArray(outputChar,10);
+       mqttPub(outputChar, "node/sensor/temp");
+      }
+      else{
+       #if SENSORDEBUG
+       Serial.println("Temp reading not published, sensor value isn't alright, you should check if sensor is ok :(");
+       #endif  
+      }
+       
+      if(humidity != 888888888){
+       str=String(humidity);
+       str.toCharArray(outputChar,10);
+       mqttPub(outputChar, "node/sensor/hum");
+      }
+      else{
+       #if SENSORDEBUG
+       Serial.println("Hum reading not published, sensor value isn't alright, you should check if sensor is ok :(");
+       #endif  
+      }
+
+      if(soilMoisture != 888888888){
+       str=String(soilMoisture);
+       str.toCharArray(outputChar,10);
+       mqttPub(outputChar, "node/sensor/moist");
+      }
+      else{
+       #if SENSORDEBUG
+       Serial.println("Moisture reading not published, sensor value isn't alright, you should check if sensor is ok :(");
+       #endif  
+      }
+
+      if(light != 888888888){
       str=String(light);
       str.toCharArray(outputChar,10);
       mqttPub(outputChar, "node/sensor/light");
+      }
+      else{
+       #if SENSORDEBUG
+       Serial.println("Light reading not published, sensor value isn't alright, you should check if sensor is ok :(");
+       #endif  
+      }
       
       #if SENSORDEBUG
       Serial.println("Sensor readings published");
       #endif
-      }
-     else{
-      #if SENSORDEBUG
-      Serial.println("Sensor readings not published, sensor values aren't alright, you should check if sensor are ok :(");
-      #endif 
-      }
     } 
   }
 }

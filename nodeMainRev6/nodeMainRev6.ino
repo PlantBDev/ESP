@@ -23,6 +23,13 @@ AsyncMqttClient mqttClient;
 //String formSsid;  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
 //String formPswd;
 
+//Checks for sensors with issues
+bool tempSensorBroke = 0;
+bool humiditySensorBroke = 0;
+bool moistureSensorBroke = 0;
+bool waterLevelSensorBroke = 0;
+bool lightSensorBroke = 0;
+
 #include"wifiCredDebug.h"
 #include"sensorRequest.h"
 #include"mqttPub.h"
