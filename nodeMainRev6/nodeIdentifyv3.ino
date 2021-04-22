@@ -134,6 +134,8 @@ for(int i = 0; i < 10; i++){  //Nested for loops for incrementing topic number, 
           Serial.print(" = ");
           Serial.println(newNameDebug);
           #endif
+
+          mqttClient.unsubscribe(topicString); //unsub from accepted topic
           
           if(topicString[l-1] == 49){    //Convoluted way to reduce the "empty" topics from the topicString to publish the new name to appropriate topic.
             topicString[l-1] = 57;

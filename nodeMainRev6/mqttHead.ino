@@ -116,32 +116,40 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     Serial.println(payloadComb);
     #endif
     if(deviceId == payloadComb){  //if the device ID and payloads ID match sensor readings can be sent
-     // New sensor readings
-     int32_t temperature = sensorRequest(1); 
-     int32_t humidity = sensorRequest(2);
-     int32_t soilMoisture = sensorRequest(3);
-     int32_t light = sensorRequest(5);
-     
-     // Sensor readings publish
-     char outputChar[10];  //Conversions for the sensor data, because "mqttPub" eats only character strings
-     String str;
-    
-     str=String(temperature);
-     str.toCharArray(outputChar,10);
-     mqttPub(outputChar, "node/sensor/temp");  //TODO find out correct topics for these
-     
-     str=String(humidity);
-     str.toCharArray(outputChar,10);
-     mqttPub(outputChar, "node/sensor/hum");
-    
-     str=String(soilMoisture);
-     str.toCharArray(outputChar,10);
-     mqttPub(outputChar, "node/sensor/moist");
-     
-     str=String(light);
-     str.toCharArray(outputChar,10);
-     mqttPub(outputChar, "node/sensor/light");
-    }
+     #if SENSORDEBUG
+     Serial.println("Sensor readings requested!");
+     #endif
+     if(temperature != 888888888 && humidity != 888888888 && soilMoisture != 888888888 && light != 888888888){
+      // Sensor readings publish
+      char outputChar[10];  //Conversions for the sensor data, because "mqttPub" eats only character strings
+      String str;
+      
+      str=String(temperature);
+      str.toCharArray(outputChar,10);
+      mqttPub(outputChar, "node/sensor/temp");  //TODO find out correct topics for these
+      
+      str=String(humidity);
+      str.toCharArray(outputChar,10);
+      mqttPub(outputChar, "node/sensor/hum");
+      
+      str=String(soilMoisture);
+      str.toCharArray(outputChar,10);
+      mqttPub(outputChar, "node/sensor/moist");
+      
+      str=String(light);
+      str.toCharArray(outputChar,10);
+      mqttPub(outputChar, "node/sensor/light");
+      
+      #if SENSORDEBUG
+      Serial.println("Sensor readings published");
+      #endif
+      }
+     else{
+      #if SENSORDEBUG
+      Serial.println("Sensor readings not published, sensor values aren't alright, you should check if sensor are ok :(");
+      #endif 
+      }
+    } 
   }
 }
 

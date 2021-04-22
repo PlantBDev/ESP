@@ -48,7 +48,11 @@ Ticker wifiReconnectTimer; // Timer to determine how often to try to reconnect w
 WiFiEventHandler wifiConnectHandler;
 WiFiEventHandler wifiDisconnectHandler;
 
-
+int32_t temperature = 888888888; 
+int32_t humidity = 888888888;
+int32_t soilMoisture = 888888888;
+int32_t waterLevel = 888888888;
+int32_t light = 888888888;
 
 void setup() {
   Serial.begin(115200);
@@ -73,32 +77,26 @@ void setup() {
   //while(schematicAcquired == 0){         //Wait for the schematic to be served
     delay(100);                   //TODO Incase of a issue here there should be a safety feature, maybe node resets after too many loops
   //}
-  
   mqttClient.subscribe("node/id", 2);  //Subscribe to the node/id topic where the nodes id will be published when it's turn to publish sensor readings
 }
 
 
 void loop() {
-  if(mqttconnected == 1 && wificonnected == 1){
+ if(mqttconnected == 1 && wificonnected == 1){
   //   New sensor readings   //
-  int32_t temperature = sensorRequest(1); 
-  //delay(5000);
-  int32_t humidity = sensorRequest(2);
-  //delay(5000);
-  int32_t soilMoisture = sensorRequest(3);
-  //delay(5000);
-  int32_t waterLevel = sensorRequest(4);
-  //delay(5000);
-  int32_t light = sensorRequest(5);
-  //delay(5000);
+  temperature = sensorRequest(1); 
+  humidity = sensorRequest(2);
+  soilMoisture = sensorRequest(3);
+  waterLevel = sensorRequest(4);
+  light = sensorRequest(5);
   
   ///////////////////////////////////////  
   //// Managing the functional parts ////  //Add schematic subscribe and wait loop before any actuator changes
   ///////////////////////////////////////
-  }
+ }
 
-  if(messagepub == 1){
-    delay(INTERVAL);
-    //ESP.deepSleep(20e6); // Sleep to reduce energy consumption, (20e6 microseconds is 20 seconds)
-  }
+ if(messagepub == 1){
+  delay(INTERVAL);
+  //ESP.deepSleep(20e6); // Sleep to reduce energy consumption, (20e6 microseconds is 20 seconds)
+ }
 }
