@@ -2,9 +2,10 @@
 
 #define MQTT_PROT_DEBUG 1 //Misc. prints relating to MQTT data transfer
 #define MQTTPUBDEBUG 1 // Prints about puplished messages
-#define WIFIMANDEBUG 1 // Debug messages on the wifiManager header
+#define WIFIMANDEBUG 0 // Debug messages on the wifiManager header
 #define IDENTITYDEBUG 1  //Debug prints relating to the "nodeIdentify" function
 #define SENSORDEBUG 1 //Toggles debug prints related to this function
+#define MQTTDEBUG 1 //
 
 #define INTERVAL  10000 // How often to publish sensor data (ms) TODO unused at the moment
 #define NAMELOC 1 //Memory location on EEPROM where the nodes name is stored TODO reconsider if this is a good value for this
@@ -23,11 +24,14 @@ AsyncMqttClient mqttClient;
 #include"sensorRequest.h"
 #include"mqttPub.h"
 
-String formSsid;  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
-String formPswd;
+String formSsid = "lassila";  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
+String formPswd = "56310460";
 
 int nodeNameFound = 0; //Used to keep track of if the node has finished determining its ID. Also hold the new ID.  TODO move to main and look into making this not global if poosible
 int nameCount[2] = {0,0};
+
+int schematicArray[6]; //Array that stores schematic data in mqtt events and makes it available in main
+int schematicProgress = 0; //Stores schematic reading progress in mqttHead and marks schematicArray as safe to read when reading is finished
 
 // MQTT Broker connect info
 #define MQTT_IP IPAddress(192, 168, 1, 236)
@@ -53,8 +57,8 @@ void setup() {
   Serial.begin(115200);
   Serial.setTimeout(2000);
   Serial.println();
-
-  wifiManager();  // Collect wifi name and password.
+  //commented out for less complex testing. Network information is thus hardcoded in this file!!!
+  //wifiManager();  // Collect wifi name and password.
 
   mqttSetup();
 
@@ -62,7 +66,7 @@ void setup() {
 
   nodeIdentify(); //Node figures out its identity
   
-  //mqttClient.subscribe("server/id", 2);  //Subscribe to the server/id topic which serves schematics to the nodes.
+  mqttClient.subscribe("server/id", 2);  //Subscribe to the server/id topic which serves schematics to the nodes.
   //while(schematicAcquired == 0){         //Wait for the schematic to be served
     delay(100);                   //TODO Incase of a issue here there should be a safety feature, maybe node resets after too many loops
   //}
@@ -73,16 +77,29 @@ void setup() {
 
 void loop() {
   if(mqttconnected == 1 && wificonnected == 1){
-  //   New sensor readings   //
-  int32_t temperature = sensorRequest(1); 
-  int32_t humidity = sensorRequest(2);
-  int32_t soilMoisture = sensorRequest(3);
-  int32_t waterLevel = sensorRequest(4);
-  int32_t light = sensorRequest(5);
-
-  ///////////////////////////////////////  
-  //// Managing the functional parts ////  //Add schematic subscribe and wait loop before any actuator changes
-  ///////////////////////////////////////
+    //   New sensor readings   //
+    /*
+    int32_t temperature = sensorRequest(1); 
+    int32_t humidity = sensorRequest(2);
+    int32_t soilMoisture = sensorRequest(3);
+    int32_t waterLevel = sensorRequest(4);
+    int32_t light = sensorRequest(5);
+  */
+    ///////////////////////////////////////  
+    //// Managing the functional parts ////  //Add schematic subscribe and wait loop before any actuator changes
+    ///////////////////////////////////////
+    //Below is a test for mqttHead schematic receiving
+    if(schematicProgress == 8)
+    {
+      Serial.println("It's now safe to use schematicArray");
+      for(int i = 0; i <= 6; i++)
+      {
+        Serial.print(schematicArray[i]);
+        Serial.print(" ");
+      }
+      Serial.println(" This is the content of schematicArray");
+      schematicProgress = 0; //this has to be done after the data is read and transferred elsewhere
+    }
   }
 
   if(messagepub == 1){
