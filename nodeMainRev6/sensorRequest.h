@@ -19,6 +19,7 @@ int sensorRequest(byte sensorNum){
  byte a,b,c,d;
 
  Wire.begin(D1,D2);  // join i2c bus with SDA=D1 and SCL=D2 of NodeMCU
+ delay(2000);
  Wire.beginTransmission(54); // begin transmission with device address 54
  Wire.write(sensorNum);  // Tell slave device which sensors data has been requested
  Wire.endTransmission();  // stop transmitting
@@ -40,11 +41,11 @@ int sensorRequest(byte sensorNum){
  sensorData = (sensorData << 8) | b;             //=>  sensorData=00000000 00000000 01010101 00001111
  sensorData = (sensorData << 8) | c;             //=>  sensordata=00000000 01010101 00001111 11110000
  sensorData = (sensorData << 8) | d;             //etc.
- if(sensorData == 888888888){
+ if(sensorData == 888888888 || sensorData == -8496 || sensorData == -18035688){
   #if SENSORDEBUG
   Serial.println("There was a issue with I2C");
   #endif
-  return sensorData;  //TODO think of a value to return when mistakes were made
+  return 888888888;  //TODO think of a value to return when mistakes were made
  }
  else{
   #if SENSORDEBUG

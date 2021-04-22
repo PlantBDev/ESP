@@ -20,17 +20,18 @@
 ESP8266WebServer server(80);  //Port selection for the wifiManager
 AsyncMqttClient mqttClient;
 
+//String formSsid;  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
+//String formPswd;
+
+#include"wifiCredDebug.h"
 #include"sensorRequest.h"
 #include"mqttPub.h"
-
-String formSsid;  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
-String formPswd;
 
 int nodeNameFound = 0; //Used to keep track of if the node has finished determining its ID. Also hold the new ID.  TODO move to main and look into making this not global if poosible
 int nameCount[2] = {0,0};
 
 // MQTT Broker connect info
-#define MQTT_IP IPAddress(192, 168, 1, 236)
+#define MQTT_IP IPAddress(192, 168, 1, 246)
 #define MQTT_PORT 1883
 
 bool wifiManConf = 0;
@@ -54,12 +55,18 @@ void setup() {
   Serial.setTimeout(2000);
   Serial.println();
 
-  wifiManager();  // Collect wifi name and password.
+  //wifiManager();  // Collect wifi name and password.
 
   mqttSetup();
 
+  while(wificonnected != 1){
   connectToWifi();  // Attempt to connect to wifi. TODO fail safe for the situation where the wifi connection fails.
-
+  delay(5000);
+  }
+  while(mqttconnected != 1){
+  delay(1000);
+  }
+  
   nodeIdentify(); //Node figures out its identity
   
   //mqttClient.subscribe("server/id", 2);  //Subscribe to the server/id topic which serves schematics to the nodes.
@@ -75,11 +82,16 @@ void loop() {
   if(mqttconnected == 1 && wificonnected == 1){
   //   New sensor readings   //
   int32_t temperature = sensorRequest(1); 
+  //delay(5000);
   int32_t humidity = sensorRequest(2);
+  //delay(5000);
   int32_t soilMoisture = sensorRequest(3);
+  //delay(5000);
   int32_t waterLevel = sensorRequest(4);
+  //delay(5000);
   int32_t light = sensorRequest(5);
-
+  //delay(5000);
+  
   ///////////////////////////////////////  
   //// Managing the functional parts ////  //Add schematic subscribe and wait loop before any actuator changes
   ///////////////////////////////////////
