@@ -22,7 +22,7 @@ int sensorRequest(byte sensorNum){
  int attemptCount = 0;
  Wire.begin(D1,D2);  // join i2c bus with SDA=D1 and SCL=D2 of NodeMCU
 
- while(sensorValueVerified == 0 || attemptCount <= SENSORATTEMPTS ){
+ while(sensorValueVerified == 0 && attemptCount <= SENSORATTEMPTS ){
   delay(3000);
   Wire.beginTransmission(54); // begin transmission with device address 54
   Wire.write(sensorNum);  // Tell slave device which sensors data has been requested
@@ -45,7 +45,7 @@ int sensorRequest(byte sensorNum){
   sensorData = (sensorData << 8) | b;             //=>  sensorData=00000000 00000000 01010101 00001111
   sensorData = (sensorData << 8) | c;             //=>  sensordata=00000000 01010101 00001111 11110000
   sensorData = (sensorData << 8) | d;             //etc.
-  
+
   if(sensorNum == 1 && sensorData <= 34 && sensorData >= 0){
     sensorValueVerified = 1;
   }

@@ -5,6 +5,8 @@
 #define WIFIMANDEBUG 1 // Debug messages on the wifiManager header
 #define IDENTITYDEBUG 1  //Debug prints relating to the "nodeIdentify" function
 #define SENSORDEBUG 1 //Toggles debug prints related to this function
+#define DANGERDEBUG 1
+#define MQTT_MSG_DEBUG 1
 
 #define INTERVAL  10000 // How often to publish sensor data (ms) TODO unused at the moment
 #define NAMELOC 1 //Memory location on EEPROM where the nodes name is stored TODO reconsider if this is a good value for this
@@ -30,12 +32,13 @@ bool moistureSensorBroke = 0;
 bool waterLevelSensorBroke = 0;
 bool lightSensorBroke = 0;
 
+int nodeNameFound = 0; //Used to keep track of if the node has finished determining its ID. Also hold the new ID.  TODO move to main and look into making this not global if poosible
+int nameCount[2] = {0,0};
+
 #include"wifiCredDebug.h"
 #include"sensorRequest.h"
 #include"mqttPub.h"
-
-int nodeNameFound = 0; //Used to keep track of if the node has finished determining its ID. Also hold the new ID.  TODO move to main and look into making this not global if poosible
-int nameCount[2] = {0,0};
+#include"topicVerification.h"
 
 // MQTT Broker connect info
 #define MQTT_IP IPAddress(192, 168, 1, 246)
@@ -85,6 +88,7 @@ void setup() {
     delay(100);                   //TODO Incase of a issue here there should be a safety feature, maybe node resets after too many loops
   //}
   mqttClient.subscribe("node/id", 2);  //Subscribe to the node/id topic where the nodes id will be published when it's turn to publish sensor readings
+  mqttClient.subscribe("node/danger/id", 2); //Subscribe to the node/id topic where the nodes id will be published when it's turn to publish danger statuses
 }
 
 
