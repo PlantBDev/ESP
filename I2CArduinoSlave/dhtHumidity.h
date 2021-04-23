@@ -3,7 +3,7 @@
 #define DHTTYPE DHT11 //Sensors' type
 
 int32_t dht(int measurePin){ //The name of the function
- Serial.println("Help");
+
   int hum = 69420;
   DHT dht(measurePin, DHTTYPE);
   dht.begin();

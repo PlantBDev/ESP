@@ -26,7 +26,9 @@
 
 #include <Wire.h>;
 int32_t humidity = 0;
-int32_t sensorData = 69420;
+
+int32_t sensorData = 888888888;
+
 byte sensorNum = 0;
 #if SENSORDEBUG
 bool sensorWasRead = 0;
@@ -38,16 +40,19 @@ void setup(){
  Wire.onRequest(requestEvent); //"requestEvent" function gets called when I2C request is received
  Serial.begin(115200); //For debug. Serial functions should not be used inside event functions relating to I2C it causes hard to find issues!!
  #if SENSORDEBUG
- delay(10);
+
+ delay(100);
+
  Serial.println(" I2C Time ");
  #endif
 }
  
 void loop(){
- delay(5000);
+
+ delay(3000);
  humidity = dht(HUMIDITYPIN);
- //interrupts();
-  Serial.print("k"); //Highly valuable debug tool
+ // Serial.print("k"); //Highly valuable debug tool
+
  #if SENSORDEBUG
  if(sensorWasRead){
   Serial.print("Read from: ");
@@ -72,8 +77,7 @@ void receiveEvent(int len) {
     break;
   case 2:  // Humidity
     sensorData = humidity;
-    //sensorData = dht(HUMIDITYPIN);
-    //sensorData = humidityHold;
+
     //sensorData = -84970000;  //For debug
     break;
   case 3:  // Moisture

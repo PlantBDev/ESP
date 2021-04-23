@@ -65,6 +65,9 @@ int emptyTopicCount = 3;  //How many empty topics are tolerated before "giving u
 char  topicString[15]="node/Count000"; //the max. string length is 14 characters + Null as string-terminator 
 uint8_t   InputInt[10]={48,49,50,51,52,53,54,55,56,57}; //48 ist the character '0' in ASCII, 49 is the '1' and so on
 int l = strlen(topicString);
+nodeNameFound = 0;
+nameCount[0] = 0;
+nameCount[1] = 0;
 
 for(int i = 0; i < 10; i++){  //Nested for loops for incrementing topic number, this limits max number of nodes to 999.
   topicString[l-3]=InputInt[i];
@@ -86,7 +89,7 @@ for(int i = 0; i < 10; i++){  //Nested for loops for incrementing topic number, 
         Serial.print(topicString);
         Serial.println("\"");
         #endif
-        delay(5000);  //Wait for 5 seconds for retained message
+        delay(3000);  //Wait for 5 seconds for retained message
         mqttClient.unsubscribe(topicString); //Unsubscribe from previous node/CountNNN topic
         nameCount[1] = nameCount[1]+1;  //Name count arrays values are incremented when MQTT message is received and when the MQTT topic is unsubscribed
                                         //Which means difference between nameCount[1] and nameCount[0] can be used to keep track of topics that didn't
@@ -131,9 +134,21 @@ for(int i = 0; i < 10; i++){  //Nested for loops for incrementing topic number, 
           Serial.print(" = ");
           Serial.println(newNameDebug);
           #endif
+
+          mqttClient.unsubscribe(topicString); //unsub from accepted topic
           
-          if(topicString[l-1] <= 51){    //Convoluted way to reduce the "empty" topics from the topicString to publish the new name to appropriate topic.
-            topicString[l-1] = topicString[l-1] + (10 - emptyTopicCount + 1);
+          if(topicString[l-1] == 49){    //Convoluted way to reduce the "empty" topics from the topicString to publish the new name to appropriate topic.
+            topicString[l-1] = 57;
+            if(topicString[l-2] == 48){
+              topicString[l-2] = 57;
+              topicString[l-3] = topicString[l-3] - 1;
+              }
+            else{
+              topicString[l-2] = topicString[l-2] - 1;  
+              }
+            }
+          else if(topicString[l-1] == 48){
+            topicString[l-1] = 56;
             if(topicString[l-2] == 48){
               topicString[l-2] = 57;
               topicString[l-3] = topicString[l-3] - 1;
@@ -143,7 +158,7 @@ for(int i = 0; i < 10; i++){  //Nested for loops for incrementing topic number, 
               }
             }
           else{
-            topicString[l-1] = topicString[l-1] - emptyTopicCount + 1;
+            topicString[l-1] = topicString[l-1] - (emptyTopicCount-1);
             }
             
           char newNamePayload[4] = "000";  //Constructing payload for publishing the new name

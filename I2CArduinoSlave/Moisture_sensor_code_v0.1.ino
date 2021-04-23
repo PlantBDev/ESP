@@ -21,7 +21,9 @@ void loop (){
 
 int32_t moistAnal (int sensorPin){
    int32_t outputValue= analogRead(sensorPin);
-   //outputValue = map(outputValue,0,1024,0,100);
+
+   outputValue = map(outputValue,0,1024,0,100);
+
   //Changing the moisture level to percents
   /*#if SENSORDEBUG
    Serial.print("Moisture Value : ");

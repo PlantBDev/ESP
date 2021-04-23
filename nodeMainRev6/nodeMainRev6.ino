@@ -5,6 +5,8 @@
 #define WIFIMANDEBUG 1 // Debug messages on the wifiManager header
 #define IDENTITYDEBUG 1  //Debug prints relating to the "nodeIdentify" function
 #define SENSORDEBUG 1 //Toggles debug prints related to this function
+#define DANGERDEBUG 1
+#define MQTT_MSG_DEBUG 1
 
 #define INTERVAL  10000 // How often to publish sensor data (ms) TODO unused at the moment
 #define NAMELOC 1 //Memory location on EEPROM where the nodes name is stored TODO reconsider if this is a good value for this
@@ -20,17 +22,26 @@
 ESP8266WebServer server(80);  //Port selection for the wifiManager
 AsyncMqttClient mqttClient;
 
-#include"sensorRequest.h"
-#include"mqttPub.h"
+//String formSsid;  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
+//String formPswd;
 
-String formSsid;  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
-String formPswd;
+//Checks for sensors with issues
+bool tempSensorBroke = 0;
+bool humiditySensorBroke = 0;
+bool moistureSensorBroke = 0;
+bool waterLevelSensorBroke = 0;
+bool lightSensorBroke = 0;
 
 int nodeNameFound = 0; //Used to keep track of if the node has finished determining its ID. Also hold the new ID.  TODO move to main and look into making this not global if poosible
 int nameCount[2] = {0,0};
 
+#include"wifiCredDebug.h"
+#include"sensorRequest.h"
+#include"mqttPub.h"
+#include"topicVerification.h"
+
 // MQTT Broker connect info
-#define MQTT_IP IPAddress(192, 168, 1, 236)
+#define MQTT_IP IPAddress(192, 168, 1, 246)
 #define MQTT_PORT 1883
 
 bool wifiManConf = 0;
@@ -47,46 +58,56 @@ Ticker wifiReconnectTimer; // Timer to determine how often to try to reconnect w
 WiFiEventHandler wifiConnectHandler;
 WiFiEventHandler wifiDisconnectHandler;
 
-
+int32_t temperature = 888888888; 
+int32_t humidity = 888888888;
+int32_t soilMoisture = 888888888;
+int32_t waterLevel = 888888888;
+int32_t light = 888888888;
 
 void setup() {
   Serial.begin(115200);
   Serial.setTimeout(2000);
   Serial.println();
 
-  wifiManager();  // Collect wifi name and password.
+  //wifiManager();  // Collect wifi name and password.
 
   mqttSetup();
 
+  while(wificonnected != 1){
   connectToWifi();  // Attempt to connect to wifi. TODO fail safe for the situation where the wifi connection fails.
-
+  delay(5000);
+  }
+  while(mqttconnected != 1){
+  delay(1000);
+  }
+  
   nodeIdentify(); //Node figures out its identity
   
   //mqttClient.subscribe("server/id", 2);  //Subscribe to the server/id topic which serves schematics to the nodes.
   //while(schematicAcquired == 0){         //Wait for the schematic to be served
     delay(100);                   //TODO Incase of a issue here there should be a safety feature, maybe node resets after too many loops
   //}
-  
   mqttClient.subscribe("node/id", 2);  //Subscribe to the node/id topic where the nodes id will be published when it's turn to publish sensor readings
+  mqttClient.subscribe("node/danger/id", 2); //Subscribe to the node/id topic where the nodes id will be published when it's turn to publish danger statuses
 }
 
 
 void loop() {
-  if(mqttconnected == 1 && wificonnected == 1){
+ if(mqttconnected == 1 && wificonnected == 1){
   //   New sensor readings   //
-  int32_t temperature = sensorRequest(1); 
-  int32_t humidity = sensorRequest(2);
-  int32_t soilMoisture = sensorRequest(3);
-  int32_t waterLevel = sensorRequest(4);
-  int32_t light = sensorRequest(5);
-
+  temperature = sensorRequest(1); 
+  humidity = sensorRequest(2);
+  soilMoisture = sensorRequest(3);
+  waterLevel = sensorRequest(4);
+  light = sensorRequest(5);
+  
   ///////////////////////////////////////  
   //// Managing the functional parts ////  //Add schematic subscribe and wait loop before any actuator changes
   ///////////////////////////////////////
-  }
+ }
 
-  if(messagepub == 1){
-    delay(INTERVAL);
-    //ESP.deepSleep(20e6); // Sleep to reduce energy consumption, (20e6 microseconds is 20 seconds)
-  }
+ if(messagepub == 1){
+  delay(INTERVAL);
+  //ESP.deepSleep(20e6); // Sleep to reduce energy consumption, (20e6 microseconds is 20 seconds)
+ }
 }
