@@ -103,7 +103,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
      if(temperature != 888888888){
        str=String(temperature);
        str.toCharArray(outputChar,10);
-       mqttPub(outputChar, "node/sensor/temp");
+       mqttClient.publish("node/sensor/temp", 2, false, outputChar);
      }
      else{
        #if SENSORDEBUG
@@ -113,7 +113,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
      if(humidity != 888888888){
        str=String(humidity);
        str.toCharArray(outputChar,10);
-       mqttPub(outputChar, "node/sensor/hum");
+       mqttClient.publish("node/sensor/hum", 2, false, outputChar);
      }
      else{
        #if SENSORDEBUG
@@ -123,7 +123,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
      if(soilMoisture != 888888888){
        str=String(soilMoisture);
        str.toCharArray(outputChar,10);
-       mqttPub(outputChar, "node/sensor/moist");
+       mqttClient.publish("node/sensor/moist", 2, false, outputChar);
      }
      else{
        #if SENSORDEBUG
@@ -133,7 +133,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
      if(light != 888888888){
        str=String(light);
        str.toCharArray(outputChar,10);
-       mqttPub(outputChar, "node/sensor/light");
+       mqttClient.publish("node/sensor/light", 2, false, outputChar);
      }
      else{
        #if SENSORDEBUG
@@ -164,15 +164,15 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       Serial.println("Danger statuses requested!");
       #endif
       outputChar[0] = tempSensorBroke+48;
-      mqttPub(outputChar, "node/danger/reading/temp");  //Publish to node/danger/# topics
+      mqttClient.publish("node/danger/reading/temp", 2, false, outputChar); //Publish to node/danger/# topics
       outputChar[0] = humiditySensorBroke+48;
-      mqttPub(outputChar, "node/danger/reading/hum");
+      mqttClient.publish("node/danger/reading/hum", 2, false, outputChar);
       outputChar[0] = moistureSensorBroke+48;
-      mqttPub(outputChar, "node/danger/reading/moist");
+      mqttClient.publish("node/danger/reading/moist", 2, false, outputChar);
       outputChar[0] = lightSensorBroke+48;
-      mqttPub(outputChar, "node/danger/reading/light");
+      mqttClient.publish("node/danger/reading/light", 2, false, outputChar);
       outputChar[0] = waterLevelSensorBroke+48;
-      mqttPub(outputChar, "node/danger/actuator/waterPump");
+      mqttClient.publish("node/danger/reading/waterPump", 2, false, outputChar);
       #if SENSORDEBUG
       Serial.println("Danger statuses published");
       #endif
@@ -187,33 +187,12 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 
     }
   }
-  if(topicVerification[0] == serverIdCompare[0] && topicVerification[1] == serverIdCompare[1] && topicVerification[2] == serverIdCompare[2] && topicVerification[3] == serverIdCompare[3] && topicVerification[4] == serverIdCompare[4] && topicVerification[5] == serverIdCompare[5] && topicVerification[6] == serverIdCompare[6] && topicVerification[7] == serverIdCompare[7] && topicVerification[8] == serverIdCompare[8] && topicVerification[9] == serverIdCompare[9] && topicVerification[10] == serverIdCompare[10]){
-    deviceId = EEPROM.read(NAMELOC);  //Read ID in the nodes memory
-    deviceId += EEPROM.read(NAMELOC+1);
-    deviceId += EEPROM.read(NAMELOC+2);
-    deviceId += EEPROM.read(NAMELOC+3);
+
+
+ 
+ if(topicVerification(topic, serverIdCompare)){
     payloadComb = (payload[0]-48) * 100 + (payload[1]-48) * 10 + (payload[2]-48);  //MAek integer from the payload to make comparing ID in devices memory and in the payload easier
-    #if MQTTPUBDEBUG
-    Serial.print("Nodes ID in memory: ");
-    Serial.print(EEPROM.read(NAMELOC));
-    Serial.print(" + ");
-    Serial.print(EEPROM.read(NAMELOC+1));
-    Serial.print(" + ");
-    Serial.print(EEPROM.read(NAMELOC+2));
-    Serial.print(" + ");
-    Serial.print(EEPROM.read(NAMELOC+3));
-    Serial.print(" = ");
-    Serial.println(deviceId);
-    Serial.print("Topic payload value: ");
-    Serial.print((payload[0]-48)*100);
-    Serial.print(" + ");
-    Serial.print((payload[1]-48)*10);
-    Serial.print(" + ");
-    Serial.print((payload[2])-48);
-    Serial.print(" = ");
-    Serial.println(payloadComb);
-    #endif
-    if(deviceId == payloadComb){  //if the device ID and payloads ID match sensor readings can be sent
+    if(nodeNameFound == payloadComb){  //if the device ID and payloads ID match sensor readings can be sent
       schematicProgress++;
       Serial.println("message recieved ;)");
       #if MQTTDEBUG

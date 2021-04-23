@@ -30,8 +30,8 @@ AsyncMqttClient mqttClient;
 //String formPswd;
 
 
-String formSsid = "0";  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
-String formPswd = "0";
+String formSsid = "lassila";  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
+String formPswd = "56310460";
 
 //Checks for sensors with issues
 bool tempSensorBroke = 0;
@@ -47,14 +47,14 @@ int nameCount[2] = {0,0};
 int schematicArray[6]; //Array that stores schematic data in mqtt events and makes it available in main
 int schematicProgress = 0; //Stores schematic reading progress in mqttHead and marks schematicArray as safe to read when reading is finished
 
-#include"wifiCredDebug.h"
+//#include"wifiCredDebug.h"
 #include"sensorRequest.h"
 #include"mqttPub.h"
 #include"topicVerification.h"
 
 
 // MQTT Broker connect info
-#define MQTT_IP IPAddress(192, 168, 1, 246)
+#define MQTT_IP IPAddress(192, 168, 1, 236)
 #define MQTT_PORT 1883
 
 bool wifiManConf = 0;
@@ -110,12 +110,11 @@ void loop() {
 
   if(mqttconnected == 1 && wificonnected == 1){
     //   New sensor readings   //
-    
-    int32_t temperature = sensorRequest(1); 
-    int32_t humidity = sensorRequest(2);
-    int32_t soilMoisture = sensorRequest(3);
-    int32_t waterLevel = sensorRequest(4);
-    int32_t light = sensorRequest(5);
+    temperature = sensorRequest(1); 
+    humidity = sensorRequest(2);
+    soilMoisture = sensorRequest(3);
+    waterLevel = sensorRequest(4);
+    light = sensorRequest(5);
   
     ///////////////////////////////////////  
     //// Managing the functional parts ////  //Add schematic subscribe and wait loop before any actuator changes
@@ -135,8 +134,5 @@ void loop() {
   }
 
 
- if(messagepub == 1){
-  delay(INTERVAL);
-  //ESP.deepSleep(20e6); // Sleep to reduce energy consumption, (20e6 microseconds is 20 seconds)
- }
+  delay(5000);
 }

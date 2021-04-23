@@ -6,8 +6,8 @@
 #include <Ticker.h>
 #include <AsyncMqttClient.h>
 
-#define WIFI_SSID "Mifi-2G"
-#define WIFI_PASSWORD "300028613652"
+#define WIFI_SSID ""
+#define WIFI_PASSWORD ""
 
 #define MQTT_HOST IPAddress(192, 168, 1, 246)
 #define MQTT_PORT 1883
@@ -171,6 +171,12 @@ for(int i = 0; i < 10; i++){  //Nested for loops for incrementing topic number, 
           Serial.print("With the name: ");
           Serial.println(newNamePayload);
           #endif
+          int nameHold = 0;
+          nameHold = EEPROM.read(NAMELOC);  //Read ID in the nodes memory
+          nameHold += EEPROM.read(NAMELOC+1);
+          nameHold += EEPROM.read(NAMELOC+2);
+          nameHold += EEPROM.read(NAMELOC+3);
+          nodeNameFound = nameHold;
           mqttClient.publish(topicString, 2, 1, newNamePayload, 14); //Publish new name to appropriate topic          
           return;
           }

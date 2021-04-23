@@ -1,3 +1,5 @@
+//Currently not in use
+
 // Simple function for simplefying already very simple mqtt publishing
 // Called with => mqttPub(message, topic);
 // Message and topic should be character strings with max length of 50
