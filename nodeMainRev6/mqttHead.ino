@@ -42,11 +42,11 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   Serial.println(payload);
   #endif
 
-
-  char outputChar[10];  //Conversions tool for the sensor data, because "mqttPub" eats only character strings
+  int payloadLen = sizeof(payload);
+  char outputChar[10] = {'\0','\0','\0','\0','\0','\0','\0','\0','\0'};  //Conversions tool for the sensor data, ful o null chars cause why not
   static uint16_t deviceId;
-  int payloadComb;
-  
+  int payloadComb = 0;
+
   char topicCompare[21] = "node/Count"; //Topics to compare with received topic
   char sensorCompare[21] = "node/id";
   char dangerCompare[21] = "node/danger/id";
@@ -55,12 +55,23 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 
 
   //         For Node Identification         //
-  if(topicVerification(topic,topicCompare)){  
+  if(topicVerification(topic,topicCompare)){
     nameCount[0] = nameCount[0]+1;  //Incrementing nameCount to keep track of topics with something in them
     deviceId = EEPROM.read(NAMELOC);  //Read ID in the nodes memory
     deviceId += EEPROM.read(NAMELOC+1);
     deviceId += EEPROM.read(NAMELOC+2);
     deviceId += EEPROM.read(NAMELOC+3);
+
+    for(int i=0; i<payloadLen; i++){   //Combining payloads Ascii characters to integers while getting rid of some trash MQTT has habbit of producing
+      if(payload[i] >= 48 && payload[i] <= 57){        //First confirm ascii character corresponds to a number value(Ascii:48-57 = Decimal:0-9)
+        payloadComb = payloadComb*10;                  //multiplying by 10 "moves" all numbers one place to the left
+        payloadComb = payloadComb + (payload[i] - 48); //lastly the current payload value is added to "the tail" of the integer after converting it to decimal of course
+      }
+      else{
+        i = payloadLen;  //if the payloads current value doesn't correspond to any decimal value there is no need to continue checking the string
+      }
+    }
+
     payloadComb = (payload[0]-48) * 100 + (payload[1]-48) * 10 + (payload[2]-48);  //MAek integer from the payload to make comparing ID in devices memory and in the payload easier
     #if IDENTITYDEBUG
     Serial.print("Nodes ID in memory: ");
@@ -87,11 +98,20 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     }
   }
 
-  
+
   //          For Sensor publish Requests          //
 
   if(topicVerification(topic,sensorCompare)){
-    payloadComb = (payload[0]-48) * 100 + (payload[1]-48) * 10 + (payload[2]-48);  //MAek integer from the payload to make comparing ID in devices memory and in the payload easier  
+    for(int i=0; i<payloadLen; i++){   //Combining payloads Ascii characters to integers while getting rid of some trash MQTT has habbit of producing
+      if(payload[i] >= 48 && payload[i] <= 57){        //First confirm ascii character corresponds to a number value(Ascii:48-57 = Decimal:0-9)
+        payloadComb = payloadComb*10;                  //multiplying by 10 "moves" all numbers one place to the left
+        payloadComb = payloadComb + (payload[i] - 48); //lastly the current payload value is added to "the tail" of the integer after converting it to decimal of course
+      }
+      else{
+        i = payloadLen;  //if the payloads current value doesn't correspond to any decimal value there is no need to continue checking the string
+      }
+    }
+
     if(nodeNameFound == payloadComb){     //if the device ID and payloads ID match sensor readings can be sent
      #if SENSORDEBUG
      Serial.println("Sensor readings requested!");
@@ -104,65 +124,105 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
        str=String(temperature);
        str.toCharArray(outputChar,10);
        mqttClient.publish("node/sensor/temp", 2, false, outputChar);
+       #if SENSORDEBUG
+       Serial.print("Sent tempature value: ");
+       Serial.println(outputChar);
+       #endif
+       for(int i=0; i<10;i++){  //Setting all of outputChars values to null to make sure the string terminating character is in correct place
+        outputChar[i] = '\0';
+       }
      }
      else{
        #if SENSORDEBUG
        Serial.println("Temp reading not published, sensor value isn't alright, you should check if sensor is ok :(");
-       #endif  
+       #endif
      }
      if(humidity != 888888888){
        str=String(humidity);
        str.toCharArray(outputChar,10);
        mqttClient.publish("node/sensor/hum", 2, false, outputChar);
+       #if SENSORDEBUG
+       Serial.print("Sent humidity value: ");
+       Serial.println(outputChar);
+       #endif
+       for(int i=0; i<10;i++){  //Setting all of outputChars values to null to make sure the string terminating character is in correct place
+        outputChar[i] = '\0';
+       }
      }
      else{
        #if SENSORDEBUG
        Serial.println("Hum reading not published, sensor value isn't alright, you should check if sensor is ok :(");
-       #endif  
+       #endif
      }
      if(soilMoisture != 888888888){
        str=String(soilMoisture);
        str.toCharArray(outputChar,10);
        mqttClient.publish("node/sensor/moist", 2, false, outputChar);
+       #if SENSORDEBUG
+       Serial.print("Sent moisture value: ");
+       Serial.println(outputChar);
+       #endif
+       for(int i=0; i<10;i++){  //Setting all of outputChars values to null to make sure the string terminating character is in correct place
+        outputChar[i] = '\0';
+       }
      }
      else{
        #if SENSORDEBUG
        Serial.println("Moisture reading not published, sensor value isn't alright, you should check if sensor is ok :(");
-       #endif  
+       #endif
      }
      if(light != 888888888){
        str=String(light);
        str.toCharArray(outputChar,10);
        mqttClient.publish("node/sensor/light", 2, false, outputChar);
+       #if SENSORDEBUG
+       Serial.print("Sent light value: ");
+       Serial.println(outputChar);
+       #endif
+       for(int i=0; i<10;i++){  //Setting all of outputChars values to null to make sure the string terminating character is in correct place
+        outputChar[i] = '\0';
+       }
      }
      else{
        #if SENSORDEBUG
        Serial.println("Light reading not published, sensor value isn't alright, you should check if sensor is ok :(");
-       #endif  
+       #endif
      }
-      #if SENSORDEBUG
-      Serial.println("Sensor readings published");
-      #endif
+     #if SENSORDEBUG
+     Serial.println("Sensor readings published");
+     #endif
     }
     else{
      #if SENSORDEBUG
-     Serial.println("Node ID != payload ID\t");
+     Serial.print("Node ID != payload ID\t");
      Serial.print(nodeNameFound);
      Serial.print(" != ");
-     Serial.print(payloadComb);
-     #endif 
+     Serial.println(payloadComb);
+     #endif
     }
   }
 
 
-  
+
   //          For Danger Topic Publish Requests          //
   if(topicVerification(topic,dangerCompare)){
-    payloadComb = (payload[0]-48) * 100 + (payload[1]-48) * 10 + (payload[2]-48);  //MAek integer from the payload to make comparing ID in devices memory and in the payload easier  
+    for(int i=0; i<payloadLen; i++){   //Combining payloads Ascii characters to integers while getting rid of some trash MQTT has habbit of producing
+      if(payload[i] >= 48 && payload[i] <= 57){        //First confirm ascii character corresponds to a number value(Ascii:48-57 = Decimal:0-9)
+        payloadComb = payloadComb*10;                  //multiplying by 10 "moves" all numbers one place to the left
+        payloadComb = payloadComb + (payload[i] - 48); //lastly the current payload value is added to "the tail" of the integer after converting it to decimal of course
+      }
+      else{
+        i = payloadLen;  //if the payloads current value doesn't correspond to any decimal value there is no need to continue checking the string
+      }
+    }
+
     if(nodeNameFound == payloadComb){  //Confirm that message had matching id with nodes id
       #if SENSORDEBUG
       Serial.println("Danger statuses requested!");
       #endif
+      for(int i=0; i<10;i++){  //Setting all of outputChars values to null to make sure the string terminating character is in correct place in the message payload
+        outputChar[i] = '\0';
+      }
       outputChar[0] = tempSensorBroke+48;
       mqttClient.publish("node/danger/reading/temp", 2, false, outputChar); //Publish to node/danger/# topics
       outputChar[0] = humiditySensorBroke+48;
@@ -173,25 +233,37 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       mqttClient.publish("node/danger/reading/light", 2, false, outputChar);
       outputChar[0] = waterLevelSensorBroke+48;
       mqttClient.publish("node/danger/reading/waterPump", 2, false, outputChar);
+      for(int i=0; i<10;i++){  //Setting all of outputChars values to null to make sure the string terminating character is in correct place
+        outputChar[i] = '\0';
+       }
+
       #if SENSORDEBUG
       Serial.println("Danger statuses published");
       #endif
     }
     else{
      #if DANGERDEBUG
-     Serial.println("Node ID != payload ID\t");
+     Serial.print("Node ID != payload ID\t");
      Serial.print(nodeNameFound);
      Serial.print(" != ");
-     Serial.print(payloadComb);
-     #endif 
+     Serial.println(payloadComb);
+     #endif
 
     }
   }
 
 
- 
+
  if(topicVerification(topic, serverIdCompare)){
-    payloadComb = (payload[0]-48) * 100 + (payload[1]-48) * 10 + (payload[2]-48);  //MAek integer from the payload to make comparing ID in devices memory and in the payload easier
+    for(int i=0; i<payloadLen; i++){   //Combining payloads Ascii characters to integers while getting rid of some trash MQTT has habbit of producing
+      if(payload[i] >= 48 && payload[i] <= 57){        //First confirm ascii character corresponds to a number value(Ascii:48-57 = Decimal:0-9)
+        payloadComb = payloadComb*10;                  //multiplying by 10 "moves" all numbers one place to the left
+        payloadComb = payloadComb + (payload[i] - 48); //lastly the current payload value is added to "the tail" of the integer after converting it to decimal of course
+      }
+      else{
+        i = payloadLen;  //if the payloads current value doesn't correspond to any decimal value there is no need to continue checking the string
+      }
+    }
     if(nodeNameFound == payloadComb){  //if the device ID and payloads ID match sensor readings can be sent
       schematicProgress++;
       Serial.println("message recieved ;)");
@@ -259,6 +331,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
             mqttClient.subscribe("server/humlightoff", 2);
             break;
           case 0:
+            Serial.print("Please hit that like button and ");
             Serial.println("Subscribe to pewdiepie!");
           break;
         }
