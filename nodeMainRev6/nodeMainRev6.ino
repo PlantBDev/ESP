@@ -6,7 +6,7 @@
 #define IDENTITYDEBUG 1  //Debug prints relating to the "nodeIdentify" function
 #define SENSORDEBUG 1 //Toggles debug prints related to this function
 #define debugNTP 0
-#define MQTTDEBUG 1
+#define MQTTDEBUG 1 
 #define DANGERDEBUG 1
 #define MQTT_MSG_DEBUG 1
 
@@ -19,7 +19,7 @@
 #include <ESP8266WiFi.h> // NodeMCu
 #include <Ticker.h> // Used to keep timings consistent
 #include <AsyncMqttClient.h> // MQTT client
-#include <WiFiClient.h>
+#include <WiFiClient.h> 
 #include <ESP8266WebServer.h> //Used in "wifiManager" header
 
 ESP8266WebServer server(80);  //Port selection for the wifiManager
@@ -66,7 +66,7 @@ Ticker wifiReconnectTimer; // Timer to determine how often to try to reconnect w
 WiFiEventHandler wifiConnectHandler;
 WiFiEventHandler wifiDisconnectHandler;
 
-int32_t temperature = 888888888;
+int32_t temperature = 888888888; 
 int32_t humidity = 888888888;
 int32_t soilMoisture = 888888888;
 int32_t waterLevel = 888888888;
@@ -91,9 +91,9 @@ void setup() {
   while(mqttconnected != 1){
    delay(1000);
   }
-
+  
   nodeIdentify(); //Node figures out its identity
-
+  
   mqttClient.subscribe("server/id", 2);  //Subscribe to the server/id topic which serves schematics to the nodes.
   mqttClient.subscribe("node/id", 2);  //Subscribe to the node/id topic where the nodes id will be published when it's turn to publish sensor readings
   mqttClient.subscribe("node/danger/id", 2); //Subscribe to the node/id topic where the nodes id will be published when it's turn to publish danger statuses
@@ -103,18 +103,18 @@ void setup() {
 void loop() {
  if(mqttconnected == 1 && wificonnected == 1){
    //   New sensor readings   //
-   temperature = sensorRequest(1);
+   temperature = sensorRequest(1); 
    humidity = sensorRequest(2);
    soilMoisture = sensorRequest(3);
    waterLevel = sensorRequest(4);
    light = sensorRequest(5);
-
+   
    //Below is a test for mqttHead schematic receiving
    if(schematicProgress == 8)
    {
      #if IDENTITYDEBUG
      Serial.println("It's now safe to use schematicArray");
-     for(int i = 0; i <= 6; i++)
+     for(int i = 0; i < 6; i++)
      {
        Serial.print(schematicArray[i]);
        Serial.print(" ");
