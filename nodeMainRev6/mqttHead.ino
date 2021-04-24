@@ -266,6 +266,10 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     }
     if(nodeNameFound == payloadComb){  //if the device ID and payloads ID match sensor readings can be sent
       schematicProgress++;
+      for(int i = 0; i < 6; i++)
+      {
+        schematicArray[i] = 0;
+      }
       Serial.println("message recieved ;)");
       #if MQTTDEBUG
         Serial.print("schematicProgress is ");
@@ -279,7 +283,16 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       {
         if(schematicProgress >= 2)
         {
-          schematicArray[schematicProgress - 2] = (payload[0]-48) * 100 + (payload[1]-48) * 10 + (payload[2]-48);  //MAek integer from the payload and store the value to the array
+          //schematicArray[schematicProgress - 2] = (payload[0]-48) * 100 + (payload[1]-48) * 10 + (payload[2]-48);  //MAek integer from the payload and store the value to the array
+          for(int i=0; i<payloadLen; i++){   //Combining payloads Ascii characters to integers while getting rid of some trash MQTT has habbit of producing
+            if(payload[i] >= 48 && payload[i] <= 57){        //First confirm ascii character corresponds to a number value(Ascii:48-57 = Decimal:0-9)
+              schematicArray[schematicProgress - 2] = schematicArray[schematicProgress - 2]*10;                  //multiplying by 10 "moves" all numbers one place to the left
+              schematicArray[schematicProgress - 2] = schematicArray[schematicProgress - 2] + (payload[i] - 48); //lastly the current payload value is added to "the tail" of the integer after converting it to decimal of course
+            }
+            else{
+              i = payloadLen;  //if the payloads current value doesn't correspond to any decimal value there is no need to continue checking the string
+            }
+          }
           #if MQTTDEBUG
             Serial.print("Stored payload: ");
             Serial.print(schematicArray[schematicProgress - 2]);
