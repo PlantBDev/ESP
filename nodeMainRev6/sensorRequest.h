@@ -49,23 +49,23 @@ int sensorRequest(byte sensorNum){
 
   if(sensorNum == 1 && sensorData <= 34 && sensorData >= 0){
     sensorValueVerified = 1;
-    bool tempSensorBroke = 0;
+    tempSensorBroke = 0;
   }
   else if(sensorNum == 2 && sensorData <= 1000 && sensorData >= -10){
     sensorValueVerified = 1;
-    bool humiditySensorBroke = 0;
+    humiditySensorBroke = 0;
   }
   else if(sensorNum == 3 && sensorData <= 100 && sensorData >= 0){
     sensorValueVerified = 1;
-    bool moistureSensorBroke = 0;
+    moistureSensorBroke = 0;
   }
   else if(sensorNum == 4 && sensorData <= 100 && sensorData >= 0){
     sensorValueVerified = 1;
-    bool waterLevelSensorBroke = 0;
+    waterLevelSensorBroke = 0;
   }
   else if(sensorNum == 5 && sensorData <= 1 && sensorData >= 0){
     sensorValueVerified = 1;
-    bool lightSensorBroke = 0;
+    lightSensorBroke = 0;
   }
   else if(sensorNum > 5 || sensorNum < 1){
     attemptCount = SENSORATTEMPTS;

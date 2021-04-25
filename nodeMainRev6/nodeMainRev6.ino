@@ -71,7 +71,7 @@ WiFiEventHandler wifiDisconnectHandler;
 void setup() {
   Serial.begin(115200);
   Serial.setTimeout(2000);
-  pinMode(RESETPIN,OUTPUT);
+  pinMode(RESETPIN,OUTPUT); //Pin used to reset the sensor device
   digitalWrite(RESETPIN,HIGH);
   Serial.println();
   timeClient.begin();//start timeClient with the setup specified in NTPinfo.h
