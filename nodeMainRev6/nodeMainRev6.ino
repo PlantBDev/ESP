@@ -4,11 +4,12 @@
 #define MQTTPUBDEBUG 1 // Prints about puplished messages
 #define WIFIMANDEBUG 0 // Debug messages on the wifiManager header
 #define IDENTITYDEBUG 1  //Debug prints relating to the "nodeIdentify" function
-#define SENSORDEBUG 1 //Toggles debug prints related to this function
+#define SENSORDEBUG 1 //Toggles debug prints related to sensor functions
 #define debugNTP 0
 #define MQTTDEBUG 1 
 #define DANGERDEBUG 1
 #define MQTT_MSG_DEBUG 1
+#define EVENTTIMERDEBUG 1
 
 
 #define INTERVAL  10000 // How often to publish sensor data (ms) TODO unused at the moment
@@ -49,7 +50,7 @@ int schematicProgress = 0; //Stores schematic reading progress in mqttHead and m
 
 
 // MQTT Broker connect info
-#define MQTT_IP IPAddress(192, 168, 1, 236)
+#define MQTT_IP IPAddress(192, 168, 1, 246)
 #define MQTT_PORT 1883
 
 bool wifiManConf = 0;
@@ -66,15 +67,12 @@ Ticker wifiReconnectTimer; // Timer to determine how often to try to reconnect w
 WiFiEventHandler wifiConnectHandler;
 WiFiEventHandler wifiDisconnectHandler;
 
-int32_t temperature = 888888888; 
-int32_t humidity = 888888888;
-int32_t soilMoisture = 888888888;
-int32_t waterLevel = 888888888;
-int32_t light = 888888888;
 
 void setup() {
   Serial.begin(115200);
   Serial.setTimeout(2000);
+  pinMode(RESETPIN,OUTPUT);
+  digitalWrite(RESETPIN,HIGH);
   Serial.println();
   timeClient.begin();//start timeClient with the setup specified in NTPinfo.h
   timeClient.setTimeOffset(timeOffset); //converts the time from UTC to local(defined in NTPinfo.h)
@@ -102,12 +100,6 @@ void setup() {
 
 void loop() {
  if(mqttconnected == 1 && wificonnected == 1){
-   //   New sensor readings   //
-   temperature = sensorRequest(1); 
-   humidity = sensorRequest(2);
-   soilMoisture = sensorRequest(3);
-   waterLevel = sensorRequest(4);
-   light = sensorRequest(5);
    
    //Below is a test for mqttHead schematic receiving
    if(schematicProgress == 8)
@@ -128,5 +120,5 @@ void loop() {
     eventTimer(schematicArray[0], schematicArray[1], schematicArray[2], schematicArray[4], schematicArray[5], schematicArray[3]);
    }
  }
- delay(5000);
+ delay(20000);
 }

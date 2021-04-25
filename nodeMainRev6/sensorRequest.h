@@ -8,6 +8,7 @@
                           light       = 5
 */
 #define SENSORATTEMPTS 20  //How many times flawed measurements are retried before giving up and returning error value(-888888888)
+#define RESETPIN D3
 
 #include <Wire.h>;
 
@@ -48,24 +49,34 @@ int sensorRequest(byte sensorNum){
 
   if(sensorNum == 1 && sensorData <= 34 && sensorData >= 0){
     sensorValueVerified = 1;
+    bool tempSensorBroke = 0;
   }
   else if(sensorNum == 2 && sensorData <= 1000 && sensorData >= -10){
     sensorValueVerified = 1;
+    bool humiditySensorBroke = 0;
   }
   else if(sensorNum == 3 && sensorData <= 100 && sensorData >= 0){
     sensorValueVerified = 1;
+    bool moistureSensorBroke = 0;
   }
   else if(sensorNum == 4 && sensorData <= 100 && sensorData >= 0){
     sensorValueVerified = 1;
+    bool waterLevelSensorBroke = 0;
   }
   else if(sensorNum == 5 && sensorData <= 1 && sensorData >= 0){
     sensorValueVerified = 1;
+    bool lightSensorBroke = 0;
   }
   else if(sensorNum > 5 || sensorNum < 1){
     attemptCount = SENSORATTEMPTS;
   }
   else{
    attemptCount++;
+  }
+  if(attemptCount == SENSORATTEMPTS/2){  //Try resetting arduino when sensors bug out
+    digitalWrite(RESETPIN,LOW);
+    delay(10);
+    digitalWrite(RESETPIN,HIGH);
   }
  }
   

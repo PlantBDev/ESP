@@ -16,6 +16,9 @@ void eventTimer(int lightOnTime, int tempLightOn, int tempLightOff, int humLight
   lightTurnOffTime = dayStartTimeH + lightOnTime;
   
   //control lights
+  #if EVENTTIMERDEBUG
+  Serial.println("Light control");
+  #endif
   if(currentTime[0] < lightTurnOffTime && !lightLevel) //check if lights should be on from clock and if lights are needed at all from ambient light sensor
   {
     lightStatus = true;
@@ -26,7 +29,12 @@ void eventTimer(int lightOnTime, int tempLightOn, int tempLightOff, int humLight
     lightStatus = false;
     digitalWrite(lightControlPin, false);
   }
+
+  
   //------------------------------------------------------SOIL MOISTURE
+  #if EVENTTIMERDEBUG
+  Serial.println("Water control");
+  #endif
   int currentSoilMoisture = sensorRequest(moistureByte); //get current moisture
   if(currentSoilMoisture < moistureLightOn && *currentTime > nextWateringTimeH)
   {
@@ -35,9 +43,11 @@ void eventTimer(int lightOnTime, int tempLightOn, int tempLightOff, int humLight
     digitalWrite(pumpControlPin, false);
   }
   
-
   //------------------------------------------------------HUMIDITY
   //Both humidity and temperature is currently handled by the same fan. Temperature condition overwrites humidity control!
+  #if EVENTTIMERDEBUG
+  Serial.println("Humidity control");
+  #endif
   int currentHumidity = sensorRequest(humidityByte);
   if(currentHumidity > humLightOn)
   {
@@ -47,9 +57,13 @@ void eventTimer(int lightOnTime, int tempLightOn, int tempLightOff, int humLight
   {
     digitalWrite(fan1ControlPin, false);
   }
+
     //------------------------------------------------------TEMPERATURE
   //------------------------------------------------------TODO handling ambient temperature being greater than desired temperature
   int currentTemperature = 0;
+  #if EVENTTIMERDEBUG
+  Serial.println("Temp control");
+  #endif
   currentTemperature = sensorRequest(temperatureByte); //get temperature from arduino
   if(currentTemperature > tempLightOn && lightStatus) //check if greenhouse should be cooled
   {
@@ -59,4 +73,6 @@ void eventTimer(int lightOnTime, int tempLightOn, int tempLightOff, int humLight
   {
     digitalWrite(fan1ControlPin, false);
   }
+
+  
 }
