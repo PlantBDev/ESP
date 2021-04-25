@@ -1,3 +1,5 @@
+//Publishes a web form in access point mode to collect wifi credentials from the user
+
 #ifndef MAIN
 #ifndef WIFIMANDEBUG
 #define WIFIMANDEBUG 1

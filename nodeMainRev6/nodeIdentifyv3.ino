@@ -1,3 +1,7 @@
+//Contains the nodeIdentify function, which checks if the nodes ID in the eeprom memory is "registered" in the system, by checking the node/countNNN topics for nodes ID.
+//If the ID is found it's saved in the "nodeNameFound" variable
+//If no ID is found, the ID in nodes memory is randomized and published to appropriate topic, very cool.
+
 #ifndef MAIN
 #define MQTTDEBUG 0
 #define MAINIAEIENAANOLEKAIKKIONMENETETTY

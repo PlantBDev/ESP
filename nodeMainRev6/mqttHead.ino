@@ -1,6 +1,8 @@
 //Main library used for mqtt "AsyncMqttClient"
 //Source: https://github.com/marvinroger/async-mqtt-client
 
+//Contains mqttSetup function and various mqtt event functions
+
 void mqttSetup(){
   mqttconnected = 0;
   wificonnected = 0;
