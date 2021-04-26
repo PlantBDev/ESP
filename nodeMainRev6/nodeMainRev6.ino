@@ -26,8 +26,14 @@
 ESP8266WebServer server(80);  //Port selection for the wifiManager
 AsyncMqttClient mqttClient;
 
-String formSsid;  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
-String formPswd;
+String formSsid = "lassila";  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
+String formPswd = "56310460";
+
+int32_t temperature = 888888888; 
+int32_t humidity = 888888888;
+int32_t soilMoisture = 888888888;
+int32_t waterLevel = 888888888;
+int32_t light = 888888888;
 
 //Checks for sensors with issues
 bool tempSensorBroke = 0;
@@ -50,7 +56,7 @@ int schematicProgress = 0; //Stores schematic reading progress in mqttHead and m
 
 
 // MQTT Broker connect info
-#define MQTT_IP IPAddress(192, 168, 1, 246)
+#define MQTT_IP IPAddress(192, 168, 1, 236)
 #define MQTT_PORT 1883
 
 bool wifiManConf = 0;
@@ -72,6 +78,9 @@ void setup() {
   Serial.begin(115200);
   Serial.setTimeout(2000);
   pinMode(RESETPIN,OUTPUT); //Pin used to reset the sensor device
+  pinMode(lightControlPin,OUTPUT);
+  pinMode(fan1ControlPin,OUTPUT);
+  pinMode(pumpControlPin,OUTPUT);
   digitalWrite(RESETPIN,HIGH);
   Serial.println();
   timeClient.begin();//start timeClient with the setup specified in NTPinfo.h
@@ -100,6 +109,11 @@ void setup() {
 
 void loop() {
  if(mqttconnected == 1 && wificonnected == 1){
+   temperature = sensorRequest(temperatureByte);
+   humidity = sensorRequest(humidityByte);
+   soilMoisture = sensorRequest(humidityByte);
+   waterLevel = sensorRequest(waterlevelByte);
+   light = sensorRequest(lightSensorByte);
    
    //Below is a test for mqttHead schematic receiving
    if(schematicProgress == 8)

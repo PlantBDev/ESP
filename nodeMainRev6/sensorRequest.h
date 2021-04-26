@@ -22,7 +22,6 @@ int sensorRequest(byte sensorNum){
  bool sensorValueVerified = 0;
  int attemptCount = 0;
  Wire.begin(D1,D2);  // join i2c bus with SDA=D1 and SCL=D2 of NodeMCU
-
  while(sensorValueVerified == 0 && attemptCount <= SENSORATTEMPTS ){
   delay(3000);
   Wire.beginTransmission(54); // begin transmission with device address 54
@@ -32,7 +31,6 @@ int sensorRequest(byte sensorNum){
   Serial.print("\nRequested datatype: ");
   Serial.println(sensorNum);
   #endif
- 
   Wire.requestFrom(54,4);   //Sending request for sensor data which is going to be a 32bit integer making it too big to be received
   while(Wire.available()){  //in just 1 piece.(I2C can deliver only one byte at a time and 32bits = 4bytes meaning we need 4 packets)
     a = Wire.read();
@@ -46,7 +44,6 @@ int sensorRequest(byte sensorNum){
   sensorData = (sensorData << 8) | b;             //=>  sensorData=00000000 00000000 01010101 00001111
   sensorData = (sensorData << 8) | c;             //=>  sensordata=00000000 01010101 00001111 11110000
   sensorData = (sensorData << 8) | d;             //etc.
-
   if(sensorNum == 1 && sensorData <= 34 && sensorData >= 0){
     sensorValueVerified = 1;
     tempSensorBroke = 0;

@@ -1,4 +1,4 @@
-#include "NTPclock.h" //to get time from NTP server
+ #include "NTPclock.h" //to get time from NTP server
 #include "eventTimerInfo.h" //ALL control pins are defined here!!
 
 //TODO improve the usefulness of input variables
@@ -21,11 +21,13 @@ void eventTimer(int lightOnTime, int tempLightOn, int tempLightOff, int humLight
   #endif
   if(currentTime[0] < lightTurnOffTime && !lightLevel) //check if lights should be on from clock and if lights are needed at all from ambient light sensor
   {
+    Serial.println("Light on");
     lightStatus = true;
     digitalWrite(lightControlPin, true);
   }
   else
   {
+    Serial.println("Light off");
     lightStatus = false;
     digitalWrite(lightControlPin, false);
   }

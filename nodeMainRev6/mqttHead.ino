@@ -49,12 +49,6 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   static uint16_t deviceId;
   int payloadComb = 0;
 
-  int32_t temperature = 888888888; 
-  int32_t humidity = 888888888;
-  int32_t soilMoisture = 888888888;
-  int32_t waterLevel = 888888888;
-  int32_t light = 888888888;
-
   char topicCompare[21] = "node/Count"; //Topics to compare with received topic
   char sensorCompare[21] = "node/id";
   char dangerCompare[21] = "node/danger/id";
@@ -127,7 +121,6 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
 
      // Sensor readings publish
      String str;
-     temperature = sensorRequest(1); 
      if(temperature != 888888888){
        str=String(temperature);
        str.toCharArray(outputChar,10);
@@ -145,7 +138,6 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
        Serial.println("Temp reading not published, sensor value isn't alright, you should check if sensor is ok :(");
        #endif
      }
-     humidity = sensorRequest(2);
      if(humidity != 888888888){
        str=String(humidity);
        str.toCharArray(outputChar,10);
@@ -163,7 +155,6 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
        Serial.println("Hum reading not published, sensor value isn't alright, you should check if sensor is ok :(");
        #endif
      }
-     soilMoisture = sensorRequest(3);
      if(soilMoisture != 888888888){
        str=String(soilMoisture);
        str.toCharArray(outputChar,10);
@@ -181,7 +172,6 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
        Serial.println("Moisture reading not published, sensor value isn't alright, you should check if sensor is ok :(");
        #endif
      }
-     light = sensorRequest(5);
      if(light != 888888888){
        str=String(light);
        str.toCharArray(outputChar,10);
@@ -234,7 +224,6 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       for(int i=0; i<10;i++){  //Setting all of outputChars values to null to make sure the string terminating character is in correct place in the message payload
         outputChar[i] = '\0';
       }
-      waterLevel = sensorRequest(4);
       outputChar[0] = tempSensorBroke+48;
       mqttClient.publish("node/danger/reading/temp", 2, false, outputChar); //Publish to node/danger/# topics
       outputChar[0] = humiditySensorBroke+48;
