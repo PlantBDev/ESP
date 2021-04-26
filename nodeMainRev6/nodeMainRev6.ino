@@ -26,8 +26,8 @@
 ESP8266WebServer server(80);  //Port selection for the wifiManager
 AsyncMqttClient mqttClient;
 
-String formSsid = "";  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
-String formPswd = "";
+String formSsid = "lassila";  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
+String formPswd = "56310460";
 
 int32_t temperature = 888888888; 
 int32_t humidity = 888888888;

@@ -21,7 +21,6 @@ void eventTimer(int lightOnTime, int tempLightOn, int tempLightOff, int humLight
   #endif
   if(currentTime[0] < lightTurnOffTime && !lightLevel) //check if lights should be on from clock and if lights are needed at all from ambient light sensor
   {
-    Serial.println("Light on");
     lightStatus = true;
     digitalWrite(lightControlPin, true);
   }
