@@ -42,6 +42,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   Serial.println(total);
   Serial.print("Payload: ");
   Serial.println(payload);
+
   #endif
 
   int payloadLen = sizeof(payload);
@@ -59,11 +60,12 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   char sensorCompare[21] = "node/id";
   char dangerCompare[21] = "node/danger/id";
   char serverIdCompare[21] = "server/id";
+  char actuatorCompare[21] = "server/actuator";
 
-
-
+//clear Serial.println("testitestitestitestitesti");
   //         For Node Identification         //
   if(topicVerification(topic,topicCompare,10)){
+Serial.println("never here?????????????????????????????????????????????????????????????????????????????????????????????????????????");
     nameCount[0] = nameCount[0]+1;  //Incrementing nameCount to keep track of topics with something in them
     deviceId = EEPROM.read(NAMELOC);  //Read ID in the nodes memory
     deviceId += EEPROM.read(NAMELOC+1);
@@ -371,6 +373,67 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
       }
     }
   }  
+
+  if(topicVerification(topic,actuatorCompare,15)) //for actuator changes
+  {
+    Serial.println("actuator stuff");
+    if(actuatorProgress)
+    {
+      if(actuatorProgress <= 4)
+      {
+        if(actuatorProgress >= 2)
+        {
+          for(int i=0; i<payloadLen; i++){   //Combining payloads Ascii characters to integers while getting rid of some trash MQTT has habbit of producing
+            if(payload[i] >= 48 && payload[i] <= 57){        //First confirm ascii character corresponds to a number value(Ascii:48-57 = Decimal:0-9)
+              actuatorArray[actuatorProgress - 2] = actuatorArray[actuatorProgress - 2]*10;                  //multiplying by 10 "moves" all numbers one place to the left
+              actuatorArray[actuatorProgress - 2] = actuatorArray[actuatorProgress - 2] + (payload[i] - 48); //lastly the current payload value is added to "the tail" of the integer after converting it to decimal of course
+            }
+            else{
+              i = payloadLen;  //if the payloads current value doesn't correspond to any decimal value there is no need to continue checking the string
+            }
+          }
+          #if MQTTDEBUG
+            Serial.print("Stored payload: ");
+            Serial.print(actuatorArray[actuatorProgress - 2]);
+            Serial.print(" and stored it in array place: ");
+            Serial.println(actuatorProgress - 2);
+          #endif
+          if(actuatorProgress == 3) //this cant be done after the incrementation because there would be no new message that would trigger this event.
+          {
+            actuatorProgress = 4; //to indicate for a check in main that it's safe to read variables from global array
+            mqttClient.unsubscribe("server/actuator/waterPump"); //this here for the same reason as the comment in the if statement above describes
+          }
+        }
+        if(actuatorProgress != 4)
+        {
+          schematicProgress++;
+        }
+        switch(actuatorProgress - 1) //minus 1 because increment happens before we are here //old information //no longer old information
+        {
+          case 1:
+          mqttClient.subscribe("server/actuator/light", 2);
+          #if MQTTDEBUG
+              Serial.println("Subscribed to server/actuator/light");
+          #endif
+          break;
+          case 2:
+            mqttClient.unsubscribe("server/actuator/light");
+            #if MQTTDEBUG
+              Serial.println("unsubscribed from server/actuator/light");
+            #endif
+            mqttClient.subscribe("server/actuator/fan1", 2);
+            #if MQTTDEBUG
+              Serial.println("Subscribed to server/actuator/fan1");
+            #endif
+            break;
+          case 0:
+            Serial.print("Please hit that like button and ");
+            Serial.println("Subscribe to pewdiepie!");
+          break;
+        }
+      }
+    }
+  }
 }
 
 void connectToWifi() {  //As the name implies try to connect to wifi with credentials from the wifiManager

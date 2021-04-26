@@ -2,12 +2,12 @@
 
 #define MQTT_PROT_DEBUG 1 //Misc. prints relating to MQTT data transfer
 #define MQTTPUBDEBUG 1 // Prints about puplished messages
-#define WIFIMANDEBUG 0 // Debug messages on the wifiManager header
+#define WIFIMANDEBUG 1 // Debug messages on the wifiManager header
 #define IDENTITYDEBUG 1  //Debug prints relating to the "nodeIdentify" function
-#define SENSORDEBUG 1 //Toggles debug prints related to sensor functions
-#define debugNTP 0
+#define SENSORDEBUG 0 //Toggles debug prints related to sensor functions
+#define debugNTP 1
 #define MQTTDEBUG 1 
-#define DANGERDEBUG 1
+#define DANGERDEBUG 0
 #define MQTT_MSG_DEBUG 1
 #define EVENTTIMERDEBUG 1
 
@@ -26,8 +26,8 @@
 ESP8266WebServer server(80);  //Port selection for the wifiManager
 AsyncMqttClient mqttClient;
 
-String formSsid;  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
-String formPswd;
+String formSsid = "lassila";  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
+String formPswd = "56310460";
 
 //Checks for sensors with issues
 bool tempSensorBroke = 0;
@@ -40,9 +40,10 @@ bool lightSensorBroke = 0;
 int nodeNameFound = 0; //Used to keep track of if the node has finished determining its ID. Also hold the new ID.  TODO move to main and look into making this not global if poosible
 int nameCount[2] = {0,0};
 
-int schematicArray[6]; //Array that stores schematic data in mqtt events and makes it available in main
+int schematicArray[6] = {0, 0, 0, 0, 0, 0}; //Array that stores schematic data in mqtt events and makes it available in main
 int schematicProgress = 0; //Stores schematic reading progress in mqttHead and marks schematicArray as safe to read when reading is finished
-
+int actuatorProgress = 0;
+int actuatorArray[3] = {0, 0, 0};
 //#include"wifiCredDebug.h"
 #include"sensorRequest.h"
 #include"topicVerification.h"
@@ -50,7 +51,7 @@ int schematicProgress = 0; //Stores schematic reading progress in mqttHead and m
 
 
 // MQTT Broker connect info
-#define MQTT_IP IPAddress(192, 168, 1, 246)
+#define MQTT_IP IPAddress(192, 168, 1, 17)
 #define MQTT_PORT 1883
 
 bool wifiManConf = 0;
@@ -95,6 +96,7 @@ void setup() {
   mqttClient.subscribe("server/id", 2);  //Subscribe to the server/id topic which serves schematics to the nodes.
   mqttClient.subscribe("node/id", 2);  //Subscribe to the node/id topic where the nodes id will be published when it's turn to publish sensor readings
   mqttClient.subscribe("node/danger/id", 2); //Subscribe to the node/id topic where the nodes id will be published when it's turn to publish danger statuses
+  mqttClient.subscribe("server/actuator/id", 2);
 }
 
 
@@ -115,6 +117,17 @@ void loop() {
      #endif
      schematicAcquired = 1;
      schematicProgress = 0; //this has to be done after the data is read and transferred elsewhere
+   }
+   if(actuatorProgress == 4) //this to test actuator functionality
+   {
+     Serial.print("hjelp");
+     for(int i = 0; i < 3; i++)
+     {
+       Serial.print("actuatorArray[i]");
+       Serial.print(" ");
+     }
+     Serial.println("this was the content of actuatorArray");
+     actuatorProgress = 0;
    }
    if(schematicAcquired == 1){
     eventTimer(schematicArray[0], schematicArray[1], schematicArray[2], schematicArray[4], schematicArray[5], schematicArray[3]);

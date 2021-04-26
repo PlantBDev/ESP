@@ -3,10 +3,11 @@
 
 
 bool topicVerification(char topic[21], char compare[21], int times){
+//Serial.println("anteeksi mita vittua"); // if this is added the code works...
  char topicVerification[times];  //used to verificate what was the topic where the publish was made
  char compareVerification[times];
- strncpy(topicVerification,topic,21);
- strncpy(compareVerification,compare,21);
+ strncpy(topicVerification,topic,times); //changed from 21 to times variable
+ strncpy(compareVerification,compare,times);
  
  for(int i=0 ; i<times ; i++){
    if(topicVerification[i] != compareVerification[i]){
