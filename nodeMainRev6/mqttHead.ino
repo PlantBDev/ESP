@@ -44,6 +44,7 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   Serial.println(payload);
   #endif
 
+  String str;
   int payloadLen = sizeof(payload);
   char outputChar[10] = {'\0','\0','\0','\0','\0','\0','\0','\0','\0'};  //Conversions tool for the sensor data, ful o null chars cause why not
   static uint16_t deviceId;
@@ -120,7 +121,6 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
      #endif
 
      // Sensor readings publish
-     String str;
      if(temperature != 888888888){
        str=String(temperature);
        str.toCharArray(outputChar,10);
@@ -218,29 +218,34 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
     }
 
     if(nodeNameFound == payloadComb){  //Confirm that message had matching id with nodes id
-      #if SENSORDEBUG
-      Serial.println("Danger statuses requested!");
-      #endif
-      for(int i=0; i<10;i++){  //Setting all of outputChars values to null to make sure the string terminating character is in correct place in the message payload
-        outputChar[i] = '\0';
-      }
-      outputChar[0] = tempSensorBroke+48;
-      mqttClient.publish("node/danger/reading/temp", 2, false, outputChar); //Publish to node/danger/# topics
-      outputChar[0] = humiditySensorBroke+48;
-      mqttClient.publish("node/danger/reading/hum", 2, false, outputChar);
-      outputChar[0] = moistureSensorBroke+48;
-      mqttClient.publish("node/danger/reading/moist", 2, false, outputChar);
-      outputChar[0] = lightSensorBroke+48;
-      mqttClient.publish("node/danger/reading/light", 2, false, outputChar);
-      outputChar[0] = waterLevelSensorBroke+48;
-      mqttClient.publish("node/danger/reading/waterPump", 2, false, outputChar);
-      for(int i=0; i<10;i++){  //Setting all of outputChars values to null to make sure the string terminating character is in correct place
-        outputChar[i] = '\0';
-       }
+      if(tempSensorBroke != dangerMemory[0] || humiditySensorBroke != dangerMemory[1] || moistureSensorBroke != dangerMemory[2] || waterLevelSensorBroke != dangerMemory[3] || lightSensorBroke != dangerMemory[4]){  //If danger statuses have changed
+        #if SENSORDEBUG
+        Serial.println("Danger statuses requested!");
+        #endif
+        for(int i=0; i<10;i++){  //Setting all of outputChars values to null to make sure the string terminating character is in correct place in the message payload
+          outputChar[i] = '\0';
+        }
+        outputChar[0] = tempSensorBroke+48;
+        mqttClient.publish("node/danger/reading/temp", 2, true, outputChar); //Publish to node/danger/# topics
+        outputChar[0] = humiditySensorBroke+48;
+        mqttClient.publish("node/danger/reading/hum", 2, true, outputChar);
+        outputChar[0] = moistureSensorBroke+48;
+        mqttClient.publish("node/danger/reading/moist", 2, true, outputChar);
+        outputChar[0] = lightSensorBroke+48;
+        mqttClient.publish("node/danger/reading/light", 2, true, outputChar);
+        outputChar[0] = waterLevelSensorBroke+48;
+        mqttClient.publish("node/danger/reading/waterPump", 2, true, outputChar);
+        str=String(nodeNameFound);
+        str.toCharArray(outputChar,10);
+        mqttClient.publish("node/danger/id", 2, false, outputChar);
+        for(int i=0; i<10;i++){  //Setting all of outputChars values to null to make sure the string terminating character is in correct place
+          outputChar[i] = '\0';
+        }
 
-      #if SENSORDEBUG
-      Serial.println("Danger statuses published");
-      #endif
+        #if SENSORDEBUG
+        Serial.println("Danger statuses published");
+        #endif
+      }
     }
     else{
      #if DANGERDEBUG

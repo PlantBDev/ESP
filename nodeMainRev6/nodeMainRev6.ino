@@ -26,8 +26,8 @@
 ESP8266WebServer server(80);  //Port selection for the wifiManager
 AsyncMqttClient mqttClient;
 
-String formSsid = "lassila";  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
-String formPswd = "56310460";
+String formSsid = "";  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
+String formPswd = "";
 
 int32_t temperature = 888888888; 
 int32_t humidity = 888888888;
@@ -41,6 +41,7 @@ bool humiditySensorBroke = 0;
 bool moistureSensorBroke = 0;
 bool waterLevelSensorBroke = 0;
 bool lightSensorBroke = 0;
+bool dangerMemory[5] = {0,0,0,0,0};
 
 
 int nodeNameFound = 0; //Used to keep track of if the node has finished determining its ID. Also hold the new ID.  TODO move to main and look into making this not global if poosible
@@ -52,11 +53,12 @@ int schematicProgress = 0; //Stores schematic reading progress in mqttHead and m
 //#include"wifiCredDebug.h"
 #include"sensorRequest.h"
 #include"topicVerification.h"
-#include "eventTimer.h"
+#include"eventTimer.h"
+#include"dangerPublish.h"
 
 
 // MQTT Broker connect info
-#define MQTT_IP IPAddress(192, 168, 1, 236)
+#define MQTT_IP IPAddress(192, 168, 1, 246)
 #define MQTT_PORT 1883
 
 bool wifiManConf = 0;
@@ -132,6 +134,15 @@ void loop() {
    }
    if(schematicAcquired == 1){
     eventTimer(schematicArray[0], schematicArray[1], schematicArray[2], schematicArray[4], schematicArray[5], schematicArray[3]);
+   }
+
+   if(tempSensorBroke != dangerMemory[0] || humiditySensorBroke != dangerMemory[1] || moistureSensorBroke != dangerMemory[2] || waterLevelSensorBroke != dangerMemory[3] || lightSensorBroke != dangerMemory[4]){  //If danger statuses have changed
+    dangerMemory[0] = tempSensorBroke;
+    dangerMemory[1] = humiditySensorBroke;
+    dangerMemory[2] = moistureSensorBroke;
+    dangerMemory[3] = waterLevelSensorBroke;
+    dangerMemory[4] = lightSensorBroke;
+    dangerPublish();
    }
  }
  delay(20000);
