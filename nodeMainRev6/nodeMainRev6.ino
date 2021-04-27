@@ -48,7 +48,7 @@ int actuatorArray[3] = {0, 0, 0};
 #include"sensorRequest.h"
 #include"topicVerification.h"
 #include "eventTimer.h"
-
+#include "eventManual.h"
 
 // MQTT Broker connect info
 #define MQTT_IP IPAddress(192, 168, 1, 17)
@@ -104,7 +104,7 @@ void loop() {
  if(mqttconnected == 1 && wificonnected == 1){
    
    //Below is a test for mqttHead schematic receiving
-   if(schematicProgress == 8)
+   if(schematicProgress >= 8)
    {
      #if IDENTITYDEBUG
      Serial.println("It's now safe to use schematicArray");
@@ -118,18 +118,23 @@ void loop() {
      schematicAcquired = 1;
      schematicProgress = 0; //this has to be done after the data is read and transferred elsewhere
    }
-   if(actuatorProgress == 4) //this to test actuator functionality
+   if(actuatorProgress >= 5) //this to test actuator functionality
    {
-     Serial.print("hjelp");
+
      for(int i = 0; i < 3; i++)
      {
-       Serial.print("actuatorArray[i]");
+       Serial.print(actuatorArray[i]);
        Serial.print(" ");
      }
      Serial.println("this was the content of actuatorArray");
      actuatorProgress = 0;
    }
-   if(schematicAcquired == 1){
+   if(actuatorProgress == 4)
+    {
+      actuatorProgress = 0;
+      eventManual(actuatorArray[0],actuatorArray[1],actuatorArray[2]);
+    }
+   else if(schematicAcquired == 1){
     eventTimer(schematicArray[0], schematicArray[1], schematicArray[2], schematicArray[4], schematicArray[5], schematicArray[3]);
    }
  }

@@ -62,10 +62,8 @@ void onMqttMessage(char* topic, char* payload, AsyncMqttClientMessageProperties 
   char serverIdCompare[21] = "server/id";
   char actuatorCompare[21] = "server/actuator";
 
-//clear Serial.println("testitestitestitestitesti");
   //         For Node Identification         //
   if(topicVerification(topic,topicCompare,10)){
-Serial.println("never here?????????????????????????????????????????????????????????????????????????????????????????????????????????");
     nameCount[0] = nameCount[0]+1;  //Incrementing nameCount to keep track of topics with something in them
     deviceId = EEPROM.read(NAMELOC);  //Read ID in the nodes memory
     deviceId += EEPROM.read(NAMELOC+1);
@@ -374,57 +372,98 @@ Serial.println("never here??????????????????????????????????????????????????????
     }
   }  
 
-  if(topicVerification(topic,actuatorCompare,15)) //for actuator changes
-  {
-    Serial.println("actuator stuff");
+ if(topicVerification(topic, "server/actuator/id",18)){
+    for(int i=0; i<payloadLen; i++){   //Combining payloads Ascii characters to integers while getting rid of some trash MQTT has habbit of producing
+      if(payload[i] >= 48 && payload[i] <= 57){        //First confirm ascii character corresponds to a number value(Ascii:48-57 = Decimal:0-9)
+        payloadComb = payloadComb*10;                  //multiplying by 10 "moves" all numbers one place to the left
+        payloadComb = payloadComb + (payload[i] - 48); //lastly the current payload value is added to "the tail" of the integer after converting it to decimal of course
+      }
+      else{
+        i = payloadLen;  //if the payloads current value doesn't correspond to any decimal value there is no need to continue checking the string
+      }
+    }
+    if(nodeNameFound == payloadComb){  //if id matches then set actuatorProgress to 1
+      actuatorProgress++; //I have absolutely no idea why this does not increment the actuatorProgress value but the statement below does....//look at the comment below
+      for(int i = 0; i < 3; i++) //zero the actuatorArray before new values
+      {
+        actuatorArray[i] = 0;
+      }
+      //actuatorProgress++; //How on earth this one then does work but the one above does not......? Well... Fuck, the comparison in the for loop above was i < 6... So it overwrote the memory for this variable because this is stored right after the actuatorArray...
+      #if MQTTDEBUG
+        Serial.println("message recieved ;)");
+        Serial.print("actuatorProgress is ");
+        Serial.println(actuatorProgress);
+      #endif
+    }
+    else{
+     #if MQTTDEBUG
+     Serial.print("Node ID != payload ID\t");
+     Serial.print(nodeNameFound);
+     Serial.print(" != ");
+     Serial.println(payloadComb);
+     #endif
+    }
+  }
+  if(topicVerification(topic,actuatorCompare,15)) //for actuator changes and to make sure no messages from other topics get mixed in actuator data
+  {    
     if(actuatorProgress)
     {
       if(actuatorProgress <= 4)
       {
         if(actuatorProgress >= 2)
         {
-          for(int i=0; i<payloadLen; i++){   //Combining payloads Ascii characters to integers while getting rid of some trash MQTT has habbit of producing
-            if(payload[i] >= 48 && payload[i] <= 57){        //First confirm ascii character corresponds to a number value(Ascii:48-57 = Decimal:0-9)
-              actuatorArray[actuatorProgress - 2] = actuatorArray[actuatorProgress - 2]*10;                  //multiplying by 10 "moves" all numbers one place to the left
-              actuatorArray[actuatorProgress - 2] = actuatorArray[actuatorProgress - 2] + (payload[i] - 48); //lastly the current payload value is added to "the tail" of the integer after converting it to decimal of course
-            }
-            else{
-              i = payloadLen;  //if the payloads current value doesn't correspond to any decimal value there is no need to continue checking the string
-            }
+          if(payload[0] == 116)// check if first letter is t for true
+          {
+            actuatorArray[actuatorProgress - 2] = 1;
           }
+          else if(payload[0] == 102)
+          {
+            actuatorArray[actuatorProgress -2] = 0;
+          }
+
           #if MQTTDEBUG
             Serial.print("Stored payload: ");
             Serial.print(actuatorArray[actuatorProgress - 2]);
             Serial.print(" and stored it in array place: ");
             Serial.println(actuatorProgress - 2);
           #endif
-          if(actuatorProgress == 3) //this cant be done after the incrementation because there would be no new message that would trigger this event.
+          if(actuatorProgress == 4) //this cant be done after the incrementation because there would be no new message that would trigger this event.
           {
-            actuatorProgress = 4; //to indicate for a check in main that it's safe to read variables from global array
+            actuatorProgress = 5; //to indicate for a check in main that it's safe to read variables from global array
             mqttClient.unsubscribe("server/actuator/waterPump"); //this here for the same reason as the comment in the if statement above describes
           }
         }
-        if(actuatorProgress != 4)
+        if(actuatorProgress != 5)
         {
-          schematicProgress++;
+          actuatorProgress++;
         }
         switch(actuatorProgress - 1) //minus 1 because increment happens before we are here //old information //no longer old information
         {
           case 1:
-          mqttClient.subscribe("server/actuator/light", 2);
-          #if MQTTDEBUG
-              Serial.println("Subscribed to server/actuator/light");
-          #endif
-          break;
+            mqttClient.subscribe("server/actuator/light", 2);
+              #if MQTTDEBUG
+               Serial.println("Subscribed to server/actuator/light");
+              #endif
+            break;
           case 2:
             mqttClient.unsubscribe("server/actuator/light");
-            #if MQTTDEBUG
-              Serial.println("unsubscribed from server/actuator/light");
-            #endif
+             #if MQTTDEBUG
+               Serial.println("unsubscribed from server/actuator/light");
+              #endif
             mqttClient.subscribe("server/actuator/fan1", 2);
+              #if MQTTDEBUG
+                Serial.println("Subscribed to server/actuator/fan1");
+              #endif
+            break;
+          case 3:
+            mqttClient.unsubscribe("server/actuator/fan1");
             #if MQTTDEBUG
-              Serial.println("Subscribed to server/actuator/fan1");
+              Serial.println("unsubscribed from server/actuator/fan1");
             #endif
+              mqttClient.subscribe("server/actuator/waterPump", 2);
+              #if MQTTDEBUG
+                Serial.println("Subscribed to server/actuator/waterPump");
+              #endif
             break;
           case 0:
             Serial.print("Please hit that like button and ");
