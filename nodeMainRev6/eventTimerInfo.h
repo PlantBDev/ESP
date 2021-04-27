@@ -14,3 +14,6 @@
 //pump on time in ms
 #define pumpSpinTime 3000
 static int nextWateringTimeH = 0; //to store next watering time
+
+//arrays to keep track of the state of the actuators
+bool previousState[3] = {false, false, false}; //order is light, fan, pump
