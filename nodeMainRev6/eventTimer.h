@@ -84,6 +84,7 @@ void eventTimer(int lightOnTime, int tempLightOn, int tempLightOff, int humLight
   //determine if actuator states have changed since last execution
   if(currentStatus[0] != previousState[0] && currentStatus[1] != previousState[1] && currentStatus[2] != previousState[2])
   {
+    //
     mqttClient.publish("node/actuator/id", 2, false, "node id here"); //TODO get node id!-----------------------------------------------------
     if(currentStatus[0])//report light status
     {

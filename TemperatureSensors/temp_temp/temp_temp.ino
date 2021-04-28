@@ -9,7 +9,7 @@ void setup() {
 }
 
 void loop() {
-  int x = voltsToTemp(3930);
-  Serial.println(x);
+  //int x = voltsToTemp(analogRead(0));
+  Serial.println(analogRead(0));
   delay(3000);
 }

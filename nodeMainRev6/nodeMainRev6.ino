@@ -4,7 +4,7 @@
 #define MQTTPUBDEBUG 1 // Prints about puplished messages
 #define WIFIMANDEBUG 1 // Debug messages on the wifiManager header
 #define IDENTITYDEBUG 1  //Debug prints relating to the "nodeIdentify" function
-#define SENSORDEBUG 0 //Toggles debug prints related to sensor functions
+#define SENSORDEBUG 1 //Toggles debug prints related to sensor functions
 #define debugNTP 1
 #define MQTTDEBUG 1
 #define DANGERDEBUG 0
@@ -26,8 +26,8 @@
 ESP8266WebServer server(80);  //Port selection for the wifiManager
 AsyncMqttClient mqttClient;
 
-String formSsid = "";  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
-String formPswd = "";
+String formSsid = "lassila";  //Wifimanager stores acquired credentials in these variables. TODO make these not global variables somehow?
+String formPswd = "56310460";
 
 int32_t temperature = 888888888;
 int32_t humidity = 888888888;
@@ -60,7 +60,7 @@ int actuatorArray[3] = {0, 0, 0};
 
 
 // MQTT Broker connect info
-#define MQTT_IP IPAddress(192, 168, 1, 17)
+#define MQTT_IP IPAddress(192, 168, 1, 236)
 #define MQTT_PORT 1883
 
 bool wifiManConf = 0;
@@ -113,10 +113,11 @@ void setup() {
 
 
 void loop() {
+  bool manual = false;
  if(mqttconnected == 1 && wificonnected == 1){
    temperature = sensorRequest(temperatureByte);
    humidity = sensorRequest(humidityByte);
-   soilMoisture = sensorRequest(humidityByte);
+   soilMoisture = sensorRequest(moistureByte);
    waterLevel = sensorRequest(waterlevelByte);
    light = sensorRequest(lightSensorByte);
 
@@ -144,14 +145,15 @@ void loop() {
        Serial.print(" ");
      }
      Serial.println("this was the content of actuatorArray");
-     actuatorProgress = 0;
+     //actuatorProgress = 0;
    }
-   if(actuatorProgress == 4)
+   if(actuatorProgress >= 4)
     {
       actuatorProgress = 0;
+      manual = true;
       eventManual(actuatorArray[0],actuatorArray[1],actuatorArray[2]);
     }
-   else if(schematicAcquired == 1){
+   if(schematicAcquired == 1 && !manual){
     eventTimer(schematicArray[0], schematicArray[1], schematicArray[2], schematicArray[4], schematicArray[5], schematicArray[3]);
    }
 
@@ -165,4 +167,5 @@ void loop() {
    }
  }
  delay(20000);
+ 
 }

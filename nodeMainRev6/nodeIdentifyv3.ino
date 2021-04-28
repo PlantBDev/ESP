@@ -57,13 +57,16 @@ EEPROM.begin(10);
 #ifndef IDENTITYDEBUG
 delay(2000);
 #endif
-
-/*EEPROM.write(NAMELOC+1, 128);  //Can be used to set custom ID to EEPROM for debug purposes
+/*
+EEPROM.write(NAMELOC, 88);
   EEPROM.commit();
-  EEPROM.write(NAMELOC+2, 64);
+EEPROM.write(NAMELOC+1, 0);  //Can be used to set custom ID to EEPROM for debug purposes
   EEPROM.commit();
-  EEPROM.write(NAMELOC+3, 32);
-  EEPROM.commit();*/
+  EEPROM.write(NAMELOC+2, 0);
+  EEPROM.commit();
+  EEPROM.write(NAMELOC+3, 0);
+  EEPROM.commit();
+  */
 
 int emptyTopicCount = 3;  //How many empty topics are tolerated before "giving up" and node renaming itself
 char  topicString[15]="node/Count000"; //the max. string length is 14 characters + Null as string-terminator 

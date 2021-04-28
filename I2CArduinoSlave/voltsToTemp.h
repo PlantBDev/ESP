@@ -3,6 +3,7 @@
 
 int32_t voltsToTemp(int MV)
 {
+  MV = map(MV, 0,1023,0,5000);
   //array that stores voltage values which correspond to temperatures between 0 and 34 decrees C
   int temperatures[] = {4366, 4347, 4331, 4316, 4297, 4279, 4262, 4242, 4203, 4182, 4162, 4146, 4129, 4109, 4088, 4062, 4022, 4001, 3979, 3955, 3932, 3907, 3880, 3858, 3756, 3721, 3682, 3641, 3600, 3557, 3516, 3482, 3452, 3423, 3391};
   int32_t i = 0, j = 34, place =0;
